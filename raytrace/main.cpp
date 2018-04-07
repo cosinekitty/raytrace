@@ -28,6 +28,7 @@
 */
 
 #include <iostream>
+#include <stdio.h>
 #include "algebra.h"
 #include "block.h"
 #include "chessboard.h"
@@ -41,7 +42,7 @@ void BlockTest()
     // We use a "Scene" object to embody the entire model
     Scene scene(Color(0.37, 0.45, 0.37, 7.0e-6));
 
-    // Create a concrete block object.  
+    // Create a concrete block object.
     // We *must* use operator new to create all solids, because the Scene destructor will delete it.
     ConcreteBlock* block = new ConcreteBlock(Vector(0.0, 0.0, -160.0), Optics(Color(0.5, 0.5, 0.5)));
     block->RotateX(-10.0);
@@ -62,6 +63,45 @@ void BlockTest()
     const char *filename = "block.png";
     scene.SaveImage(filename, 320, 400, 4.5, 4);
     std::cout << "Wrote " << filename << std::endl;
+}
+
+void BlockMovie()
+{
+    using namespace std;
+    using namespace Imager;
+
+    // We use a "Scene" object to embody the entire model
+    Scene scene(Color(0.37, 0.45, 0.37, 7.0e-6));
+
+    // Create a concrete block object.
+    // We *must* use operator new to create all solids, because the Scene destructor will delete it.
+    ConcreteBlock* block = new ConcreteBlock(Vector(0.0, 0.0, -160.0), Optics(Color(0.5, 0.5, 0.5)));
+    block->RotateX(-10.0);
+    block->RotateY(-15.0);
+    scene.AddSolidObject(block);
+
+    // Create a sphere and put it into the scene also.
+    Sphere* sphere = new Sphere(Vector(10.0, 3.0, -147.0), 3.5);
+    sphere->SetFullMatte(Color(0.6, 0.4, 0.45));
+    scene.AddSolidObject(sphere);
+
+    // Add a light source to illuminate the objects in the scene; otherwise we won't see anything!
+    scene.AddLightSource(LightSource(Vector( +20.0,  +20.0,  +80.0), Color(0.5, 0.1, 0.1, 0.15)));
+    scene.AddLightSource(LightSource(Vector(+100.0, +120.0,  -70.0), Color(0.2, 0.5, 0.4, 1.00)));
+    scene.AddLightSource(LightSource(Vector(  +3.0,  +13.0,  +80.0), Color(0.6, 0.5, 0.3, 1.20)));
+
+    // Generate a series of PNG files for the frames of the movie.
+    const int numFrames = 30*30;
+
+    for (int frame=0; frame < numFrames; ++frame)
+    {
+        char filename[100];
+        sprintf(filename, "blockmovie/frame%04d.png", frame);
+        block->RotateX(0.700);
+        block->RotateZ(0.113);
+        scene.SaveImage(filename, 1280, 720, 3.5, 4);
+        std::cout << "Wrote " << filename << std::endl;
+    }
 }
 
 void SphereTest()
@@ -104,8 +144,8 @@ void TorusTest(const char* filename, double glossFactor)
     torus2->RotateX(-90.0);
 
     SetUnion *doubleTorus = new SetUnion(
-        Vector(0.0, 0.0, 0.0), 
-        torus1, 
+        Vector(0.0, 0.0, 0.0),
+        torus1,
         torus2
     );
 
@@ -115,18 +155,18 @@ void TorusTest(const char* filename, double glossFactor)
     doubleTorus->RotateX(-45.0);
     doubleTorus->RotateY(-30.0);
 
-    // Add a light source to illuminate the objects 
+    // Add a light source to illuminate the objects
     // in the scene; otherwise we won't see anything!
     scene.AddLightSource(
         LightSource(
-            Vector(-45.0, +10.0, +50.0), 
+            Vector(-45.0, +10.0, +50.0),
             Color(1.0, 1.0, 0.3, 1.0)
         )
     );
 
     scene.AddLightSource(
         LightSource(
-            Vector(+5.0, +90.0, -40.0), 
+            Vector(+5.0, +90.0, -40.0),
             Color(0.5, 0.5, 1.5, 0.5)
         )
     );
@@ -176,22 +216,22 @@ void SetIntersectionTest()
     const double radius = 1.0;
 
     Sphere* sphere1 = new Sphere(
-        Vector(-0.5, 0.0, 0.0), 
+        Vector(-0.5, 0.0, 0.0),
         radius
     );
 
     sphere1->SetFullMatte(Color(1.0, 1.0, 0.5));
 
     Sphere* sphere2 = new Sphere(
-        Vector(+0.5, 0.0, 0.0), 
+        Vector(+0.5, 0.0, 0.0),
         radius
     );
 
     sphere2->SetFullMatte(Color(1.0, 0.5, 1.0));
 
     SetIntersection *isect = new SetIntersection(
-        Vector(0.0, 0.0, 0.0), 
-        sphere1, 
+        Vector(0.0, 0.0, 0.0),
+        sphere1,
         sphere2
     );
 
@@ -362,8 +402,8 @@ void DodecahedronOverlapTest()
     Sphere* sphere = new Sphere(sphereCenter, 1.8);
 
     SetIntersection* isect = new SetIntersection(
-        sphereCenter, 
-        dodecahedron, 
+        sphereCenter,
+        dodecahedron,
         sphere);
 
     scene.AddSolidObject(isect);
@@ -400,7 +440,7 @@ void AddKaleidoscopeMirrors(Imager::Scene& scene, double width, double depth)
     }
 
     // Rotate/translate the three mirrors differently.
-    // Use the common value 's' that tells how far 
+    // Use the common value 's' that tells how far
     // the midpoints are from the origin.
     const double s = b + a/sqrt(3.0);
 
@@ -412,7 +452,7 @@ void AddKaleidoscopeMirrors(Imager::Scene& scene, double width, double depth)
     // The bottom mirror just moves down (in the -y direction)
     mirror[0]->Translate(0.0, -s, 0.0);
     mirror[0]->SetTag("bottom mirror");
-   
+
     // The upper left mirror moves up and left
     // and rotates +60 degrees around z axis.
     mirror[1]->Translate(-s*ca, s*sa, 0.0);
@@ -446,8 +486,8 @@ void KaleidoscopeTest()
     Sphere* sphere = new Sphere(sphereCenter, 1.8);
 
     SetIntersection* isect = new SetIntersection(
-        sphereCenter, 
-        dodecahedron, 
+        sphereCenter,
+        dodecahedron,
         sphere);
 
     isect->RotateZ(19.0);
@@ -521,8 +561,8 @@ void ChessBoardTest()
     // Create the chess board and add it to the scene.
 
     ChessBoard* board = new ChessBoard(
-        innerSize, 
-        xBorderSize, 
+        innerSize,
+        xBorderSize,
         yBorderSize,
         thickness,
         lightSquareColor,
@@ -543,7 +583,7 @@ void ChessBoardTest()
         double radius;
     };
 
-    const sphere_info sinfo[] = 
+    const sphere_info sinfo[] =
     {
         { Vector(-1.8, 0.0, -17.0), 0.72 },
         { Vector( 0.0, 0.0, -17.0), 0.72 },
@@ -557,7 +597,7 @@ void ChessBoardTest()
         sphere->SetOpacity(0.17);
         sphere->SetMatteGlossBalance(0.95, Color(0.4,0.5,0.7), Color(0.8,1.0,0.7));
         scene.AddSolidObject(sphere);
-    }    
+    }
 
     // Add light sources.
 
@@ -607,8 +647,8 @@ struct CommandEntry
 
 // You can add more command line options to this program by
 // adding another entry to the array below.
-// Each item in the ray is a string followed by a 
-// function to be called when that string appears 
+// Each item in the ray is a string followed by a
+// function to be called when that string appears
 // on the command line.
 const CommandEntry CommandTable[] =
 {
@@ -630,6 +670,10 @@ const CommandEntry CommandTable[] =
 
     { "kaleid", KaleidoscopeTest,
         "    Kaleidoscope using three mirrors.\n"
+    },
+
+    { "blockmovie", BlockMovie,
+        "    Create movie frames of a block rotating.\n"
     },
 };
 
